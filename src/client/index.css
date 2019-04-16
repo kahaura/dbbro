@@ -1,0 +1,8 @@
+table.data-grid {
+    margin: auto;
+    width: 100%;
+}
+
+.data-grid-container .data-grid .cell > input {
+    height: 13px !important;
+}
