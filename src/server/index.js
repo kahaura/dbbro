@@ -7,36 +7,7 @@ app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-
 app.use(express.static('dist'));
 
-const local = {
-    user: 'sa',
-    password: 'Sxmaster2',
-    server: 'localhost', // You can use 'localhost\\instance' to connect to named instance
-    options: {
-        encrypt: true // Use this if you're on Windows Azure
-    },
-    pool: {
-        max: 10,
-        min: 0,
-        idleTimeoutMillis: 30000
-    }
-};
-
-const remote = {
-    user: 'sa',
-    password: 'Allianz1234!',
-    server: '10.10.100.40', // You can use 'localhost\\instance' to connect to named instance
-    database: 'INTELVIA',
-    options: {
-        encrypt: true // Use this if you're on Windows Azure
-    },
-    pool: {
-        max: 2,
-        min: 0,
-        idleTimeoutMillis: 30000
-    }
-};
-
-const engine = new SQLServerManager(local)
+const engine = new SQLServerManager({})
 
 app.get('/api/v1/databases', async (req, res) => {
     const ignoreFetchTables = req.params.ignoreFetchTables
