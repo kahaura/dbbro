@@ -1,131 +1,173 @@
-import React from 'react'
-import Humanize from 'humanize-plus';
-import { Input, Card, Icon, List, Header, Segment, Dropdown } from 'semantic-ui-react';
-import { StateHolder, Query } from 'client/utils';
+/* eslint-disable no-nested-ternary */
+/* eslint-disable react/no-array-index-key */
+/* eslint-disable react/prop-types */
+import React from "react";
+import {
+  Input,
+  Card,
+  Icon,
+  Header,
+  Segment,
+  Message,
+  List
+} from "semantic-ui-react";
+import { get, getUrlParams } from "client/utils";
+import DatabaseCreateModal from "client/server/database-create";
+import DatabaseDropModal from "client/server/database-drop";
+import Page from "client/page";
 
-const TableOverview = ({tables}) => {
-    const all = tables.map((e, index) => {
-        return (
-            <List.Item key={index}>
-                <List.Content>
-                    <List.Header style={{    
-                        textOverflow: 'ellipsis',
-                        whiteSspace: 'nowrap',
-                        overflow: 'hidden'
-                    }}>
-                        {e}
-                    </List.Header>
-                </List.Content>
-            </List.Item>
-        );
-    });
-    return (
-        <List divided verticalAlign='middle' ordered> 
-            {all.slice(0, 7)}
+const DatabaseOverview = ({ database, onDatabaseDropClick }) => {
+  const items = database.schemas.map((schema, i) => (
+    <List.Item key={i}>
+      <List.Icon name="list" size="small" verticalAlign="middle" />
+      <List.Content>{schema.name}</List.Content>
+    </List.Item>
+  ));
+  return (
+    <Card>
+      <Card.Content>
+        <Header
+          as="h5"
+          style={{
+            textOverflow: "ellipsis",
+            whiteSspace: "nowrap",
+            overflow: "hidden"
+          }}
+        >
+          <a
+            href={`/#/schema?server=${getUrlParams().server}&database=${
+              database.name
+            }`}
+          >
+            <Icon name="database" />
+            <Header.Content>
+              {database.name}
+              <Header.Subheader>
+                {database.system ? "System" : "User"}
+              </Header.Subheader>
+            </Header.Content>
+          </a>
+        </Header>
+      </Card.Content>
+      <Card.Content style={{ minHeight: "183px" }}>
+        <List divided relaxed>
+          {items.slice(0, 6)}
         </List>
-    );
-}
-
-const DatabaseOverview = ({database}) => {
-    const loading = (
-        <Icon loading name='asterisk' /> 
-    );
-    return (
-        <Card>
-            <Card.Content>
-                <Header as='h5' style={{    
-                        textOverflow: 'ellipsis',
-                        whiteSspace: 'nowrap',
-                        overflow: 'hidden'
-                }}>
-                    <a href={`/#/database?name=${database.name}`}>
-                        <Icon name='database' />
-                        <Header.Content>
-                            {database.name}
-                            <Header.Subheader>{database.system ? 'System schema' : 'User schema'}</Header.Subheader>
-                        </Header.Content>
-                    </a>
-            </Header>
-            </Card.Content>
-            <Card.Content style={{minHeight: '183px'}}>
-                <TableOverview tables={database.tables}/>
-            </Card.Content>
-            <Card.Content extra>
-                <code>[{Humanize.intword(database.tables.length, 1)}] Tables</code>
-            </Card.Content>                    
-        </Card>
-    )
+      </Card.Content>
+      <Card.Content extra >
+        <div style={{ position: "absolute" }}>
+          [{database.schemas.length}] Schemas
+        </div>
+          <div style={{ textAlign: "right", height: '19px' }}>
+          {!database.system && (
+            <Icon
+              link
+              name="remove"
+              color="red"
+              floated="right"
+              onClick={() => onDatabaseDropClick(database.name)}
+            />
+            )}
+            </div>
+      </Card.Content>
+    </Card>
+  );
 };
 
-const DatabaseList = ({databases, filter, filterType}) => {
-    const list = databases.filter((item) => {
-        if(!filter) {
-            return true;
-        }
-        const text = filter.toUpperCase();
-        const data = filterType == 'full' 
-            ? Object.entries(item).toString().toUpperCase()
-            : filterType == 'tables'
-                ? Object.entries(item.tables).toString().toUpperCase()
-                : item.name.toUpperCase();
-        return data.search(text) >= 0;
-    });
-    const tables = list.map((item, index) => <DatabaseOverview database={item} key={index} />);
-    return (
-        <Segment vertical padded>
-            <Card.Group> 
-                {tables}
-            </Card.Group>
-        </Segment>
-    );
-}
-
-const Filter = ({state, invalidate}) => {
-    const searchOptions = [
-        {key: 'databases', text: 'Databases', value: 'databases'},
-        {key: 'tables', text: 'Tables', value: 'tables'},
-        {key: 'full', text: 'Full', value: 'full'},
-    ];
-    const defaultFilterType = state.filterType ? state.filterType : 'databases';
-    const FilterType = () => (
-        <Dropdown 
-            button 
-            basic 
-            floating 
-            options={searchOptions} 
-            defaultValue={defaultFilterType} 
-            onChange={(e, {value}) => invalidate({filterType: value})}/>
-    )
-    return (
-        <Segment basic vertical padded>
-            <Input 
-                action={<FilterType />}
-                fluid 
-                icon='search' 
-                iconPosition='left'
-                placeholder='Search...' 
-                onChange={(e) => invalidate({filter: e.target.value})}/>
-        </Segment>
-    );
+const DatabaseList = ({ databases, filter, onDatabaseDropClick }) => {
+  const list = databases.filter(item => {
+    if (!filter) {
+      return true;
+    }
+    const text = filter.toUpperCase();
+    const data = Object.entries(item)
+      .toString()
+      .toUpperCase();
+    return data.search(text) >= 0;
+  });
+  const cards = list.map((item, index) => (
+    <DatabaseOverview
+      database={item}
+      key={index}
+      onDatabaseDropClick={onDatabaseDropClick}
+    />
+  ));
+  return (
+    <Segment vertical padded>
+      <Card.Group>{cards}</Card.Group>
+    </Segment>
+  );
 };
 
-const DatabaseListPage = () => (
-    <Query path='/api/v1/databases'>
-        {(list) => {
-            return (
-                <div className='home' style={{padding: '16px'}}>
-                    <StateHolder init={{filterType: 'databases'}}>
-                        {(state, invalidate) => (
-                            <div className='databases'>
-                                <Filter state={state} invalidate={invalidate}/>
-                                <DatabaseList databases={list} filter={state.filter} filterType={state.filterType} />
-                            </div>
-                        )}
-                    </StateHolder>
-                </div>
-            );
+const Filter = ({ onCreateDatabaseClick, onFilterChange }) => {
+  return (
+    <Segment basic vertical padded>
+      <Input
+        action={{
+          color: "teal",
+          labelPosition: "right",
+          icon: "add",
+          content: "Create database",
+          onClick: onCreateDatabaseClick
         }}
-    </Query>
-)
+        fluid
+        icon="search"
+        iconPosition="left"
+        placeholder="Search..."
+        onChange={e => onFilterChange(e.target.value)}
+      />
+    </Segment>
+  );
+};
 
-export default DatabaseListPage;
+export default class DatabaseListPage extends React.Component {
+  state = { databases: [], showAddForm: false, dropDatabaseName: null };
+
+  render() {
+    const {
+      error,
+      databases,
+      filter,
+      showAddForm,
+      dropDatabaseName
+    } = this.state;
+    return (
+      <Page>
+        <Filter
+          onCreateDatabaseClick={() => this.setState({ showAddForm: true })}
+          onFilterChange={filter => this.setState({ filter })}
+        />
+        <DatabaseList
+          databases={error ? [] : databases}
+          filter={filter}
+          onDatabaseDropClick={dropDatabaseName =>
+            this.setState({ dropDatabaseName })
+          }
+        />
+        <DatabaseCreateModal
+          open={showAddForm}
+          onClose={() => this.setState({ showAddForm: false })}
+          onCreate={async () => await this.refreshList()}
+        />
+        <DatabaseDropModal
+          dropDatabaseName={dropDatabaseName}
+          onClose={() => this.setState({ dropDatabaseName: null })}
+          onDrop={async () => await this.refreshList()}
+        />
+        {error && <Message negative content={error} />}
+      </Page>
+    );
+  }
+
+  async refreshList() {
+    const { server } = getUrlParams();
+    const { error, result } = await get("/api/v1/database/find", {
+      server
+    });
+    this.setState({ error, databases: result });
+  }
+
+  async componentDidMount() {
+    await this.refreshList();
+  }
+}

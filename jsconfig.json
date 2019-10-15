@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "es2015",
+    "allowSyntheticDefaultImports": false,
+    "baseUrl": ".",
+    "paths": {
+      "client/*": ["./src/client/*"],
+      "server/*": ["./src/server/*"],
+    }
+  },
+  "exclude": ["node_modules", "dist"]
+}

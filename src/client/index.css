@@ -6,3 +6,102 @@ table.data-grid {
 .data-grid-container .data-grid .cell > input {
     height: 13px !important;
 }
+
+.terminal-container {
+    width: 100%;
+    height: 100%;
+    overflow: scroll;
+    background: black;
+}
+
+.terminal-modal {
+    width: 90%;
+    height: 90%;
+}
+
+.terminal-modal .content {
+    width: 100%;
+    height: 100%;
+}
+
+.console {
+    width: 100%;
+    height: 100%;
+    background: black;
+    overflow: scroll;
+}
+
+.console .console-container {
+    width: 100%;
+    height: 100%;
+}
+
+.console .console-container p {
+    margin: 0;
+    color: green;
+}
+
+.console .console-container h5 {
+    margin: 0;
+    color: red;
+}
+
+.console .console-prompt {
+    width: 100%;
+    text-shadow: 0 0 5px #C8C8C8;
+}
+
+.console .console-prompt .console-prompt-text {
+    color: #fc0;
+}
+
+.console .console-prompt .console-prompt-input input {
+    background-color: transparent;
+    border: none;
+    color: inherit;
+    font: inherit;
+    margin: 0;
+    outline: none;
+    width: 100%;
+    color: white;
+}
+
+.console .console-prompt .console-prompt-pushed {
+    color: #bbb;
+    text-shadow: 0 0 1px #C8C8C8;
+}
+
+.editor-modal {
+    width: 90%;
+    height: 90%;
+}
+
+.editor-modal .content {
+    padding: 0 !important;
+    width: 100%;
+    height: calc(100% - 61px);
+    overflow: hidden;
+}
+
+.editor-modal .content .editor-edit {
+    width: 100%;
+    height: 50%;
+    border-bottom: 1px grey solid;
+}
+
+.editor-modal .editor-actions {
+    position: absolute;
+}
+
+.editor-modal .content .editor-result {
+    padding: 4px;
+    width: 100%;
+    height: calc(50% - 32px);
+    overflow: scroll;
+    overflow-y: scroll;
+}
+
+.editor-modal .content .editor-error {
+    position: absolute;
+    padding: 8px;
+}
